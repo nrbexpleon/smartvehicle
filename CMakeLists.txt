@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(SmartVehicle VERSION 0.2.0 LANGUAGES CXX)
+project(SmartVehicle VERSION 0.3.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -8,6 +8,7 @@ option(SMARTVEHICLE_ENABLE_OPENSSL "Build the OpenSSL production crypto adapter"
 
 set(SMARTVEHICLE_SOURCES
   src/platform.cpp
+  src/runtime/vehicle_os.cpp
   src/hal/socketcan.cpp
   src/ota/ab_slot.cpp)
 if(SMARTVEHICLE_ENABLE_OPENSSL)
@@ -30,13 +31,18 @@ add_executable(vehicle_status examples/vehicle_status/main.cpp)
 target_link_libraries(vehicle_status PRIVATE smartvehicle)
 add_executable(ota_simulation examples/ota_simulation/main.cpp)
 target_link_libraries(ota_simulation PRIVATE smartvehicle)
+add_executable(vehicle_os_demo examples/vehicle_os/main.cpp)
+target_link_libraries(vehicle_os_demo PRIVATE smartvehicle)
 
 enable_testing()
 add_executable(smartvehicle_tests tests/test_main.cpp)
 target_link_libraries(smartvehicle_tests PRIVATE smartvehicle)
 add_test(NAME smartvehicle_tests COMMAND smartvehicle_tests)
+add_executable(vehicle_os_tests tests/test_vehicle_os.cpp)
+target_link_libraries(vehicle_os_tests PRIVATE smartvehicle)
+add_test(NAME vehicle_os_tests COMMAND vehicle_os_tests)
 
-install(TARGETS smartvehicle vehicle_status ota_simulation
+install(TARGETS smartvehicle vehicle_status ota_simulation vehicle_os_demo
   RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 install(DIRECTORY include/ DESTINATION include)
 set(CPACK_PACKAGE_NAME smartvehicle)
