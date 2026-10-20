@@ -1,0 +1,3 @@
+#include "smartvehicle/platform/runtime.hpp"
+#include <iostream>
+using namespace smartvehicle;static UpdateManifest m(){return{"update-001","vehicle-services","1.1.0","linux-x86_64","artifact-v1.1","test-hash:artifact-v1.1","test-signature:artifact-v1.1","test-root",true};}int main(){auto c=std::make_shared<DeterministicTestCrypto>();UpdateManager ok(c,"linux-x86_64","1.0.0",{});ok.offer(m());std::cout<<"success="<<(ok.execute()?"committed":"failed")<<'\n';UpdateManager rb(c,"linux-x86_64","1.0.0",{});rb.offer(m());auto r=rb.execute(false,true);std::cout<<"rollback-scenario="<<r.detail<<" audit-events="<<rb.audit_log().size()<<'\n';UpdateManager stop(c,"linux-x86_64","1.0.0",{});stop.offer(m());std::cout<<"interruption="<<stop.execute(true).detail<<'\n';}
