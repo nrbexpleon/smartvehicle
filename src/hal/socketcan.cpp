@@ -1,5 +1,6 @@
 #include "smartvehicle/hal/socketcan.hpp"
 
+#include <algorithm>
 #include <cerrno>
 #include <cstring>
 #include <string>
@@ -19,10 +20,10 @@ LinuxSocketCan::~LinuxSocketCan() { close(); }
 
 Result<bool> LinuxSocketCan::open(std::string_view interface_name) {
   close();
+#ifdef __linux__
   if (interface_name.empty() || interface_name.size() >= IFNAMSIZ) {
     return Result<bool>::failure(ErrorCode::invalid_argument, "invalid CAN interface name");
   }
-#ifdef __linux__
   socket_ = ::socket(PF_CAN, SOCK_RAW | SOCK_CLOEXEC, CAN_RAW);
   if (socket_ < 0) {
     return Result<bool>::failure(ErrorCode::invalid_state,
