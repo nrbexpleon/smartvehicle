@@ -53,4 +53,6 @@ The embedded profile is deliberately non-runnable. SOME/IP, DDS, CAN drivers, Au
 
 ## Security and licensing
 
-Do not commit secrets or production keys. Test crypto accepts only deterministic `test-*` fixtures. See [SECURITY.md](SECURITY.md). Licensed under MIT.
+Do not commit secrets or production keys. Test crypto accepts only deterministic `test-*` fixtures. See [SECURITY.md](SECURITY.md).
+
+This version is proprietary and source-available. Production, commercial, vehicle, embedded-system, customer, or field deployment requires a separate written commercial license. See [LICENSE](LICENSE) or contact `nagaraj.rbhagwat@expleogroup.com` or an authorized representative of Expleo Group. Earlier versions validly released under MIT remain governed by their earlier license.
