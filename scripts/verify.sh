@@ -7,4 +7,5 @@ cmake --build --preset host-debug -j2
 ctest --preset host-debug
 ./build/vehicle_status config/profiles/host-simulation.json
 ./build/ota_simulation
+./build/vehicle_os_demo
 python3 tools/sbom/generate.py

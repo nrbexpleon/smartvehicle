@@ -3,6 +3,7 @@
 #include "smartvehicle/runtime/executor.hpp"
 #include <chrono>
 #include <map>
+#include <mutex>
 #include <shared_mutex>
 #include <string>
 #include <vector>
