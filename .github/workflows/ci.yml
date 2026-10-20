@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
+      - name: Install host adapter dependencies
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libssl-dev
       - name: Validate configuration and architecture
         run: |
           python3 tools/config_validator/validate.py config/profiles/*.json
@@ -33,7 +35,7 @@ jobs:
         run: |
           python3 tools/sbom/generate.py
           cd build && cpack -G TGZ
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: smartvehicle-host-artifacts
