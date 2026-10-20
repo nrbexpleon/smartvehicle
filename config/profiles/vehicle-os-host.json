@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "profile": "vehicle-os-host",
+  "platform": "linux-x86_64",
+  "runnable": true,
+  "transport": "in_process",
+  "signal_provider": "simulated-a",
+  "adapters": {
+    "crypto": "openssl-evp",
+    "can": "socketcan",
+    "ota_slots": "filesystem-ab-journal"
+  },
+  "enabled_services": [
+    "vehicle-signals",
+    "vehicle-state",
+    "vehicle-health",
+    "runtime-supervisor",
+    "update-manager"
+  ],
+  "service_dependencies": {
+    "vehicle-state": ["vehicle-signals"],
+    "vehicle-health": ["runtime-supervisor"],
+    "vehicle-signals": [],
+    "runtime-supervisor": [],
+    "update-manager": []
+  },
+  "api_versions": {"vehicle-signals": "1.0", "runtime-supervisor": "1.0"},
+  "resource_limits": {
+    "event_queue": 64,
+    "vehicle_message_bytes": 256,
+    "maximum_runtime_tasks": 32,
+    "memory_budget_bytes": 67108864
+  },
+  "security": {"default_deny": true, "artifact_hash": "sha256"},
+  "ota": {"allow_downgrade": false, "max_failed_boots": 1},
+  "logging": {"level": "info"}
+}

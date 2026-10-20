@@ -1,6 +1,8 @@
-# SmartVehicle SDV Platform
+# SmartVehicle Portable Vehicle OS Platform
 
-A buildable C++20 service-oriented vehicle platform with strict layer boundaries, versioned service discovery, typed signals, deterministic middleware, authorization, replaceable HALs, Linux SocketCAN, OpenSSL verification, and persistent OTA A/B recovery decisions. Displayed vehicle values remain **simulation data** unless a target integration explicitly states otherwise.
+A buildable C++20 service-oriented vehicle platform with bounded runtime primitives, platform capability negotiation, health supervision, versioned service discovery, typed signals, authorization, replaceable HALs, Linux SocketCAN, OpenSSL verification, and persistent OTA A/B recovery decisions. Displayed vehicle values remain **simulation data** unless a target integration explicitly states otherwise.
+
+SmartVehicle is a userspace vehicle platform over Linux or a suitable RTOS/hypervisor. It is not a new kernel and does not claim safety certification.
 
 ## Quick start
 
@@ -20,42 +22,49 @@ cmake --build --preset host-debug -j2
 ctest --preset host-debug
 ./build/vehicle_status config/profiles/host-simulation.json
 ./build/ota_simulation
+./build/vehicle_os_demo
 ```
 
-## Useful host stack
+## Vehicle OS runtime
 
+- **Portable activation:** workloads declare core, memory, clock, threading, virtual-memory, hardware-crypto, CAN and Ethernet requirements. Incompatible targets are rejected explicitly.
+- **Bounded executor:** cooperative periodic dispatch has a fixed task-table limit, stable criticality ordering, execution budgets, dispatch caps and overrun statistics.
+- **Health supervision:** heartbeat deadlines drive bounded restart, degraded-mode and safe-state decisions according to component criticality.
+- **Efficient messaging:** `BoundedChannel<T,N>` provides fixed-capacity FIFO storage and backpressure. `VehicleMessage` embeds a bounded 256-byte payload.
 - **Vehicle services:** versioned registry/discovery, typed signal reads, events, health, timeouts and default-deny authorization.
-- **Real Linux CAN boundary:** `LinuxSocketCan` supports physical SocketCAN or `vcan`, classic CAN frames, bounded payloads and receive timeouts without leaking Linux types upward.
-- **Production-library crypto adapter:** OpenSSL 3 EVP provides SHA-256, public-key signature verification and CSPRNG identifiers. Test-only deterministic crypto remains isolated.
-- **Persistent OTA recovery model:** an atomic filesystem journal models inactive-slot staging, activation, post-boot health commit, failed-health rollback and interrupted-activation recovery.
+- **Linux CAN boundary:** `LinuxSocketCan` supports physical SocketCAN or `vcan`, classic CAN frames, bounded payloads and receive timeouts without leaking Linux types upward.
+- **Production-library crypto:** OpenSSL 3 EVP provides SHA-256, public-key signature verification and CSPRNG identifiers. Test-only deterministic crypto remains isolated.
+- **Persistent OTA recovery:** an atomic filesystem journal models inactive-slot staging, activation, post-boot health commit, failed-health rollback and interrupted-activation recovery.
 - **Safety gate:** physical actuator commands remain disabled by default.
 
-The Vehicle Status executable loads a profile, registers/discovers API 1.0, reads speed, battery state of charge and operating state, publishes events, reports health, replaces simulator A with simulator B, and runs unchanged application logic. The OTA executable demonstrates verified update flow plus persistent A/B success, failed-health rollback and power-loss recovery decisions.
+The Vehicle OS demo performs host capability negotiation, sends a bounded vehicle message, dispatches a periodic ASIL-labelled workload, captures budget metrics and evaluates platform health. Criticality labels are metadata for scheduling and supervision; they do not establish an ASIL claim.
 
 ## Architecture
 
 - **L7 application:** consumes only service/platform contracts.
-- **L6 services:** signal API, health/error semantics, authorization.
-- **L5 middleware:** registry/discovery and bounded in-process pub/sub.
-- **L4 platform:** configuration, crypto/time/log/storage contracts.
+- **L6 services:** signal API, lifecycle, health/error semantics and authorization.
+- **L5 middleware:** bounded channels, fixed messages, registry/discovery and pub/sub.
+- **L4 runtime/platform:** deterministic executor, health supervisor, capabilities, crypto/time/log/storage contracts.
 - **L3 HAL:** signal-provider, SocketCAN and actuator-safety boundaries.
-- **L2 base software:** startup validation, composition and resource policy.
-- **L1 implementation:** Linux/x86-64 host adapters and simulator.
+- **L2 base software:** startup validation, composition, resource and recovery policy.
+- **L1 implementation:** Linux/x86-64 host adapters and simulator; ARM64/RTOS adapters are explicit ports.
 
-See [architecture](docs/architecture/overview.md), [integration status](docs/architecture/integration-status.md), [API contract](docs/api-contracts/vehicle-signals.md), [OTA state machine](docs/ota/state-machine.md), [threat model](docs/cybersecurity/threat-model.md), [testing](docs/testing/strategy.md), and [SoC porting](docs/porting-guide/soc-porting.md).
+See [vehicle OS architecture](docs/architecture/vehicle-os-platform.md), [architecture overview](docs/architecture/overview.md), [integration status](docs/architecture/integration-status.md), [API contract](docs/api-contracts/vehicle-signals.md), [OTA state machine](docs/ota/state-machine.md), [threat model](docs/cybersecurity/threat-model.md), [testing](docs/testing/strategy.md), and [SoC porting](docs/porting-guide/soc-porting.md).
 
-## Add or replace a component
+## Porting
 
-1. Implement the narrow public contract; keep vendor types inside an adapter.
-2. Select it through composition/configuration.
-3. Add contract, timeout, error, concurrency, authorization and substitution tests.
-4. Run `./scripts/verify.sh`; breaking APIs require a new major version.
+1. Implement narrow clock, thread, storage, transport, CAN, crypto and boot-control contracts; keep vendor types inside adapters.
+2. Populate board capabilities and reject workloads that exceed target resources.
+3. Select adapters through composition/configuration.
+4. Add contract, timeout, error, concurrency, authorization, budget and substitution tests.
+5. Measure WCET, stack, memory and end-to-end latency on target hardware.
+6. Run `./scripts/verify.sh`; breaking APIs require a new major version.
 
-To add real hardware, bind the HAL contracts in a dedicated adapter and retain the actuator gate until safety review. To use OTA on target, connect `AbUpdateCoordinator` decisions to authenticated boot-control variables and rollback counters; the host journal is not a bootloader.
+Retain the actuator gate until safety review. Connect `AbUpdateCoordinator` decisions to authenticated boot-control variables and rollback counters; the host journal is not a bootloader.
 
 ## Honest scope
 
-SOME/IP, DDS, CAN FD, Automotive Ethernet, RTOS, AUTOSAR Classic/Adaptive, secure-element key custody, a target bootloader and power-loss-qualified installation remain integration targets. The OpenSSL and SocketCAN adapters are concrete host/Linux implementations, but do not establish vehicle production readiness. An architectural mapping is not AUTOSAR compliance or certification. This project does not claim ISO 26262, ISO/SAE 21434, UNECE R155/R156 or ASPICE compliance.
+SOME/IP, DDS, CAN FD, Automotive Ethernet/TSN, concrete Zephyr/FreeRTOS/QNX adapters, AUTOSAR Classic/Adaptive, secure-element key custody, a target bootloader and power-loss-qualified installation remain integration targets. Host/Linux implementations do not establish vehicle production readiness. Architectural mapping and criticality metadata are not AUTOSAR or ISO 26262 compliance. This project does not claim ISO 26262, ISO/SAE 21434, UNECE R155/R156 or ASPICE compliance.
 
 ## Security and licensing
 
