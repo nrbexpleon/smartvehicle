@@ -1,1 +1,24 @@
-{"schema_version":"1.0","profile":"embedded-reference","platform":"arm64-embedded-linux-porting-target","runnable":false,"transport":"in_process","signal_provider":"UNIMPLEMENTED-can-adapter","enabled_services":["vehicle-signals","vehicle-state","vehicle-health"],"service_dependencies":{"vehicle-state":["vehicle-signals"],"vehicle-health":[],"vehicle-signals":[]},"api_versions":{"vehicle-signals":"1.0"},"resource_limits":{"event_queue":32},"security":{"default_deny":true},"ota":{"allow_downgrade":false},"logging":{"level":"info"}}
+{
+  "schema_version": "1.0",
+  "profile": "embedded-reference",
+  "platform": "arm64-embedded-linux-porting-target",
+  "runnable": false,
+  "transport": "in_process",
+  "signal_provider": "UNIMPLEMENTED-can-signal-mapper",
+  "adapters": {
+    "crypto": "openssl-evp-or-secure-element-port",
+    "can": "socketcan-or-vendor-driver-port",
+    "ota_slots": "bootloader-contract-required"
+  },
+  "enabled_services": ["vehicle-signals", "vehicle-state", "vehicle-health"],
+  "service_dependencies": {
+    "vehicle-state": ["vehicle-signals"],
+    "vehicle-health": [],
+    "vehicle-signals": []
+  },
+  "api_versions": {"vehicle-signals": "1.0"},
+  "resource_limits": {"event_queue": 32, "can_payload_bytes": 8},
+  "security": {"default_deny": true, "artifact_hash": "sha256"},
+  "ota": {"allow_downgrade": false, "max_failed_boots": 1},
+  "logging": {"level": "info"}
+}

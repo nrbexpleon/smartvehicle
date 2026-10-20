@@ -1,1 +1,30 @@
-{"schema_version":"1.0","profile":"host-simulation","platform":"linux-x86_64","runnable":true,"transport":"in_process","signal_provider":"simulated-a","enabled_services":["vehicle-signals","vehicle-state","vehicle-health","update-manager"],"service_dependencies":{"vehicle-state":["vehicle-signals"],"vehicle-health":[],"vehicle-signals":[],"update-manager":[]},"api_versions":{"vehicle-signals":"1.0"},"resource_limits":{"event_queue":64},"security":{"default_deny":true},"ota":{"allow_downgrade":false},"logging":{"level":"info"}}
+{
+  "schema_version": "1.0",
+  "profile": "host-simulation",
+  "platform": "linux-x86_64",
+  "runnable": true,
+  "transport": "in_process",
+  "signal_provider": "simulated-a",
+  "adapters": {
+    "crypto": "openssl-evp",
+    "can": "socketcan",
+    "ota_slots": "filesystem-ab-journal"
+  },
+  "enabled_services": [
+    "vehicle-signals",
+    "vehicle-state",
+    "vehicle-health",
+    "update-manager"
+  ],
+  "service_dependencies": {
+    "vehicle-state": ["vehicle-signals"],
+    "vehicle-health": [],
+    "vehicle-signals": [],
+    "update-manager": []
+  },
+  "api_versions": {"vehicle-signals": "1.0"},
+  "resource_limits": {"event_queue": 64, "can_payload_bytes": 8},
+  "security": {"default_deny": true, "artifact_hash": "sha256"},
+  "ota": {"allow_downgrade": false, "max_failed_boots": 1},
+  "logging": {"level": "info"}
+}
