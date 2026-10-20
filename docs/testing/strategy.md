@@ -1,0 +1,3 @@
+# Testing and quality gates
+
+`./scripts/verify.sh` validates both profiles and dependency direction, configures/builds with warnings as errors, runs 24 compiled checks, executes both simulations, and emits a CycloneDX 1.5 SBOM. Tests cover versions, discovery, duplicate registration, pub/sub, timeout, authorization, malformed/unknown signals, provider substitution, actuator gating, OTA success, hash/signature/target rejection, interruption, health failure, and rollback decision. Real hardware, network transports, bootloaders, and production cryptography require target-specific rigs and are not claimed.

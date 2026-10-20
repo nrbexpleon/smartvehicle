@@ -1,0 +1,35 @@
+name: ci
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  build-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate configuration and architecture
+        run: |
+          python3 tools/config_validator/validate.py config/profiles/*.json
+          python3 tools/dependency_checker/check.py .
+      - name: Configure
+        run: cmake --preset host-debug
+      - name: Build
+        run: cmake --build --preset host-debug -j2
+      - name: Test
+        run: ctest --preset host-debug
+      - name: Run examples
+        run: |
+          ./build/vehicle_status config/profiles/host-simulation.json
+          ./build/ota_simulation
+      - name: Generate SBOM and package
+        run: |
+          python3 tools/sbom/generate.py
+          cd build && cpack -G TGZ
+      - uses: actions/upload-artifact@v4
+        with:
+          name: smartvehicle-host-artifacts
+          path: |
+            build/sbom.cdx.json
+            build/*.tar.gz
