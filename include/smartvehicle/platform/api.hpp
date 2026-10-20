@@ -1,10 +1,13 @@
 #pragma once
 #include <chrono>
+#include <compare>
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 namespace smartvehicle {
 struct ApiVersion { std::uint16_t major{1}; std::uint16_t minor{0}; [[nodiscard]] bool satisfies(const ApiVersion& r) const noexcept { return major==r.major && minor>=r.minor; } auto operator<=>(const ApiVersion&) const = default; };
 enum class ErrorCode { ok, invalid_argument, not_found, already_exists, incompatible_version, timeout, queue_full, unauthorized, invalid_state, integrity_failure, signature_failure, incompatible_artifact, insufficient_storage, interrupted, health_check_failed, rollback_failed };
