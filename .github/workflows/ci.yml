@@ -8,7 +8,7 @@ jobs:
   build-test:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Validate configuration and architecture
         run: |
           python3 tools/config_validator/validate.py config/profiles/*.json
@@ -16,7 +16,13 @@ jobs:
       - name: Configure
         run: cmake --preset host-debug
       - name: Build
-        run: cmake --build --preset host-debug -j2
+        shell: bash
+        run: |
+          if ! cmake --build --preset host-debug -j2 > build/build.log 2>&1; then
+            grep -E "(error:|undefined reference)" build/build.log | head -50 | while IFS= read -r line; do echo "::error::$line"; done
+            cat build/build.log
+            exit 1
+          fi
       - name: Test
         run: ctest --preset host-debug
       - name: Run examples
@@ -28,8 +34,10 @@ jobs:
           python3 tools/sbom/generate.py
           cd build && cpack -G TGZ
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: smartvehicle-host-artifacts
           path: |
+            build/build.log
             build/sbom.cdx.json
             build/*.tar.gz
